@@ -1,0 +1,2 @@
+# UpgradedPistons
+A mod that focuses on upgrading the pistons in minecraft 1.12.2 to bring more functionality that numerous "More Pistons" mods in the past had implemented. The core code referenced for this mod is from the Golloum Teams More Pistons mod for 1.710, while the code was referenced, UpgradedPistons does not copy the implementation but tries to bring a different flavor of implementation with an up-gradable block system, which i liked from thermal expansion so instead of a bunch of pistons hopefully there will be only a few depending on the final implementation
