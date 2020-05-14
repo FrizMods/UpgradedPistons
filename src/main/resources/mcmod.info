@@ -1,14 +1,14 @@
 [
 {
-  "modid": "examplemod",
-  "name": "Example Mod",
-  "description": "Example placeholder mod.",
-  "version": "${version}",
-  "mcversion": "${mcversion}",
+  "modid": "upgradedpistons",
+  "name": "Upgraded Pistons",
+  "description": "A new More Pistons mod for 1.12.2",
+  "version": "1.0",
+  "mcversion": "1.12.2",
   "url": "",
   "updateUrl": "",
-  "authorList": ["ExampleDude"],
-  "credits": "The Forge and FML guys, for making this example",
+  "authorList": ["frizzle101101"],
+  "credits": "GolloumTeam MorePistons-1.7.10",
   "logoFile": "",
   "screenshots": [],
   "dependencies": []
