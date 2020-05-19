@@ -1,0 +1,8 @@
+{
+    "parent": "block/cube_bottom_top",
+    "textures": {
+        "bottom": "upgradedpistons:blocks/piston_bottom",
+        "side": "upgradedpistons:blocks/piston_side",
+        "top": "upgradedpistons:blocks/piston_top_sticky"
+    }
+}

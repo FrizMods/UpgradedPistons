@@ -1,0 +1,16 @@
+{
+    "variants": {
+    "facing=down,short=false": { "model": "upgradedpistons:stateinterface/piston_rod", "x": 90 },
+        "facing=up,short=false": { "model": "upgradedpistons:stateinterface/piston_rod", "x": 270 },
+        "facing=north,short=false": { "model": "upgradedpistons:stateinterface/piston_rod" },
+        "facing=south,short=false": { "model": "upgradedpistons:stateinterface/piston_rod", "y": 180 },
+        "facing=west,short=false": { "model": "upgradedpistons:stateinterface/piston_rod", "y": 270 },
+        "facing=east,short=false": { "model": "upgradedpistons:stateinterface/piston_rod", "y": 90 },
+        "facing=down,short=true": { "model": "upgradedpistons:stateinterface/piston_rod_short", "x": 90 },
+        "facing=up,short=true": { "model": "upgradedpistons:stateinterface/piston_rod_short", "x": 270 },
+        "facing=north,short=true": { "model": "upgradedpistons:stateinterface/piston_rod_short" },
+        "facing=south,short=true": { "model": "upgradedpistons:stateinterface/piston_rod_short", "y": 180 },
+        "facing=west,short=true": { "model": "upgradedpistons:stateinterface/piston_rod_short", "y": 270 },
+        "facing=east,short=true": { "model": "upgradedpistons:stateinterface/piston_rod_short", "y": 90 }
+    }
+}

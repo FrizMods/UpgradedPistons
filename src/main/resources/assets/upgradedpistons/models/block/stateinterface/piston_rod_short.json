@@ -1,0 +1,7 @@
+{
+    "parent": "upgradedpistons:block/model_upgraded_piston_rod_short",
+    "textures": {
+        "side": "upgradedpistons:blocks/piston_side",
+        "platform": "upgradedpistons:blocks/piston_top_normal"
+    }
+}

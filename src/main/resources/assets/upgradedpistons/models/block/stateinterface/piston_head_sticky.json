@@ -1,0 +1,8 @@
+{
+    "parent": "upgradedpistons:block/model_upgraded_piston_head",
+    "textures": {
+        "unsticky": "upgradedpistons:blocks/piston_top_normal",
+        "side": "upgradedpistons:blocks/piston_side",
+        "platform": "upgradedpistons:blocks/piston_top_sticky"
+    }
+}
