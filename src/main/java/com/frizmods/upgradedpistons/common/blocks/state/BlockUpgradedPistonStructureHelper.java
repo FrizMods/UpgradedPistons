@@ -23,7 +23,7 @@ public class BlockUpgradedPistonStructureHelper
     /** This is a List<BlockPos> of blocks that will be destroyed when a piston attempts to move them. */
     private final List<BlockPos> toDestroy = Lists.<BlockPos>newArrayList();
 
-    public BlockUpgradedPistonStructureHelper(World worldIn, BlockPos posIn, EnumFacing pistonFacing, boolean extending)
+    public BlockUpgradedPistonStructureHelper(World worldIn, BlockPos posIn, EnumFacing pistonFacing, boolean extending, int extensionOffset)
     {
         this.world = worldIn;
         this.pistonPos = posIn;

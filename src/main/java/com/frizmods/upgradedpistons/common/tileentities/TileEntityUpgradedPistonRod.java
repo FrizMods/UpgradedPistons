@@ -5,7 +5,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.frizmods.upgradedpistons.common.blocks.BlockUpgradedPistonBase;
-import com.frizmods.upgradedpistons.common.blocks.BlockUpgradedPistonExtension;
+import com.frizmods.upgradedpistons.common.blocks.BlockUpgradedPistonHead;
 import com.frizmods.upgradedpistons.init.ModBlocks;
 import com.google.common.collect.Lists;
 
@@ -27,13 +27,17 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class TileEntityUpgradedPiston extends TileEntity implements ITickable
+public class TileEntityUpgradedPistonRod extends TileEntity implements ITickable
 {
+	private final float extension = 5.0F;
+	
 	private IBlockState pistonState;
     private EnumFacing pistonFacing;
     /** if this piston is extending or not */
     private boolean extending;
     private boolean shouldHeadBeRendered;
+    
+    
     private static final ThreadLocal<EnumFacing> MOVING_ENTITY = new ThreadLocal<EnumFacing>()
     {
         protected EnumFacing initialValue()
@@ -45,11 +49,11 @@ public class TileEntityUpgradedPiston extends TileEntity implements ITickable
     /** the progress in (de)extending */
     private float lastProgress;
 
-    public TileEntityUpgradedPiston()
+    public TileEntityUpgradedPistonRod()
     {
     }
 
-    public TileEntityUpgradedPiston(IBlockState pistonStateIn, EnumFacing pistonFacingIn, boolean extendingIn, boolean shouldHeadBeRenderedIn)
+    public TileEntityUpgradedPistonRod(IBlockState pistonStateIn, EnumFacing pistonFacingIn, boolean extendingIn, boolean shouldHeadBeRenderedIn)
     {
         this.pistonState = pistonStateIn;
         this.pistonFacing = pistonFacingIn;
@@ -142,7 +146,7 @@ public class TileEntityUpgradedPiston extends TileEntity implements ITickable
 
     private IBlockState getCollisionRelatedBlockState()
     {
-        return !this.isExtending() && this.shouldPistonHeadBeRendered() ? ModBlocks.UPGRADED_PISTON_HEAD.getDefaultState().withProperty(BlockUpgradedPistonExtension.TYPE, this.pistonState.getBlock() == Blocks.STICKY_PISTON ? BlockUpgradedPistonExtension.EnumPistonType.STICKY : BlockUpgradedPistonExtension.EnumPistonType.DEFAULT).withProperty(BlockUpgradedPistonExtension.FACING, this.pistonState.getValue(BlockUpgradedPistonBase.FACING)) : this.pistonState;
+        return !this.isExtending() && this.shouldPistonHeadBeRendered() ? ModBlocks.UPGRADED_PISTON_HEAD.getDefaultState().withProperty(BlockUpgradedPistonHead.TYPE, this.pistonState.getBlock() == ModBlocks.UPGRADED_STICKY_PISTON ? BlockUpgradedPistonHead.EnumPistonType.STICKY : BlockUpgradedPistonHead.EnumPistonType.DEFAULT).withProperty(BlockUpgradedPistonHead.FACING, this.pistonState.getValue(BlockUpgradedPistonBase.FACING)) : this.pistonState;
     }
 
     private void moveCollidedEntities(float p_184322_1_)
@@ -332,7 +336,7 @@ public class TileEntityUpgradedPiston extends TileEntity implements ITickable
             this.world.removeTileEntity(this.pos);
             this.invalidate();
 
-            if (this.world.getBlockState(this.pos).getBlock() == ModBlocks.UPGRADED_PISTON_EXTENSION)
+            if (this.world.getBlockState(this.pos).getBlock() == ModBlocks.UPGRADED_PISTON_MOVING)
             {
                 this.world.setBlockState(this.pos, this.pistonState, 3);
                 this.world.neighborChanged(this.pos, this.pistonState.getBlock(), this.pos);
@@ -352,7 +356,7 @@ public class TileEntityUpgradedPiston extends TileEntity implements ITickable
             this.world.removeTileEntity(this.pos);
             this.invalidate();
 
-			if (this.world.getBlockState(this.pos).getBlock() == ModBlocks.UPGRADED_PISTON_EXTENSION)
+			if (this.world.getBlockState(this.pos).getBlock() == ModBlocks.UPGRADED_PISTON_MOVING)
             {
                 this.world.setBlockState(this.pos, this.pistonState, 3);
                 this.world.neighborChanged(this.pos, this.pistonState.getBlock(), this.pos);
@@ -414,7 +418,7 @@ public class TileEntityUpgradedPiston extends TileEntity implements ITickable
 
             if (this.shouldPistonHeadBeRendered())
             {
-                iblockstate = ModBlocks.UPGRADED_PISTON_HEAD.getDefaultState().withProperty(BlockUpgradedPistonExtension.FACING, this.pistonFacing).withProperty(BlockUpgradedPistonExtension.SHORT, Boolean.valueOf(this.extending != 1.0F - this.progress < 0.25F));
+                //iblockstate = ModBlocks.UPGRADED_PISTON_HEAD.getDefaultState().withProperty(BlockUpgradedPistonExtension.FACING, this.pistonFacing).withProperty(BlockUpgradedPistonExtension.SHORT, Boolean.valueOf(this.extending != 1.0F - this.progress < 0.25F));
             }
             else
             {
@@ -425,7 +429,7 @@ public class TileEntityUpgradedPiston extends TileEntity implements ITickable
             double d0 = (double)((float)this.pistonFacing.getFrontOffsetX() * f);
             double d1 = (double)((float)this.pistonFacing.getFrontOffsetY() * f);
             double d2 = (double)((float)this.pistonFacing.getFrontOffsetZ() * f);
-            iblockstate.addCollisionBoxToList(p_190609_1_, p_190609_2_, p_190609_3_.offset(-d0, -d1, -d2), p_190609_4_, p_190609_5_, true);
+            //iblockstate.addCollisionBoxToList(p_190609_1_, p_190609_2_, p_190609_3_.offset(-d0, -d1, -d2), p_190609_4_, p_190609_5_, true);
 
             for (int j = i; j < p_190609_4_.size(); ++j)
             {

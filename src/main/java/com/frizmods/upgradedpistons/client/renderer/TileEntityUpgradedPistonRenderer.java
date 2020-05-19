@@ -1,8 +1,8 @@
 package com.frizmods.upgradedpistons.client.renderer;
 
 import com.frizmods.upgradedpistons.common.blocks.BlockUpgradedPistonBase;
-import com.frizmods.upgradedpistons.common.blocks.BlockUpgradedPistonExtension;
-import com.frizmods.upgradedpistons.common.tileentities.TileEntityUpgradedPiston;
+import com.frizmods.upgradedpistons.common.blocks.BlockUpgradedPistonHead;
+import com.frizmods.upgradedpistons.common.tileentities.TileEntityUpgradedPistonHead;
 import com.frizmods.upgradedpistons.init.ModBlocks;
 
 import net.minecraft.block.Block;
@@ -25,11 +25,11 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class TileEntityUpgradedPistonRenderer extends TileEntitySpecialRenderer<TileEntityUpgradedPiston>
+public class TileEntityUpgradedPistonRenderer extends TileEntitySpecialRenderer<TileEntityUpgradedPistonHead>
 {	
 	private BlockRendererDispatcher blockRenderer;
 	
-	public void render(TileEntityUpgradedPiston te, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
+	public void render(TileEntityUpgradedPistonHead te, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
     {
         if (blockRenderer == null) blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher(); //Forge: Delay this from constructor to allow us to change it later
         BlockPos blockpos = te.getPos();
@@ -59,16 +59,18 @@ public class TileEntityUpgradedPistonRenderer extends TileEntitySpecialRenderer<
             bufferbuilder.setTranslation(x - (double)blockpos.getX() + (double)te.getOffsetX(partialTicks), y - (double)blockpos.getY() + (double)te.getOffsetY(partialTicks), z - (double)blockpos.getZ() + (double)te.getOffsetZ(partialTicks));
             World world = this.getWorld();
 
-            if (block == ModBlocks.UPGRADED_PISTON_HEAD && te.getProgress(partialTicks) <= 0.25F)
+            if (block == ModBlocks.UPGRADED_PISTON_HEAD && te.getProgress(partialTicks) <= 0.5F)
             {
-                iblockstate = iblockstate.withProperty(BlockUpgradedPistonExtension.SHORT, Boolean.valueOf(true));
+                iblockstate = iblockstate.withProperty(BlockUpgradedPistonHead.SHORT, Boolean.valueOf(true));
                 this.renderStateModel(blockpos, iblockstate, bufferbuilder, world, true);
             }
             else if (te.shouldPistonHeadBeRendered() && !te.isExtending())
             {
-                BlockUpgradedPistonExtension.EnumPistonType BlockUpgradedPistonExtension$enumpistontype = block == ModBlocks.UPGRADED_STICKY_PISTON ? BlockUpgradedPistonExtension.EnumPistonType.STICKY : BlockUpgradedPistonExtension.EnumPistonType.DEFAULT;
-                IBlockState iblockstate1 = ModBlocks.UPGRADED_PISTON_HEAD.getDefaultState().withProperty(BlockUpgradedPistonExtension.TYPE, BlockUpgradedPistonExtension$enumpistontype).withProperty(BlockUpgradedPistonExtension.FACING, iblockstate.getValue(BlockUpgradedPistonBase.FACING));
-                iblockstate1 = iblockstate1.withProperty(BlockUpgradedPistonExtension.SHORT, Boolean.valueOf(te.getProgress(partialTicks) >= 0.5F));
+                BlockUpgradedPistonHead.EnumPistonType BlockUpgradedPistonExtension$enumpistontype = block == ModBlocks.UPGRADED_STICKY_PISTON ? BlockUpgradedPistonHead.EnumPistonType.STICKY : BlockUpgradedPistonHead.EnumPistonType.DEFAULT;
+                IBlockState iblockstate1 = ModBlocks.UPGRADED_PISTON_HEAD.getDefaultState()
+                		.withProperty(BlockUpgradedPistonHead.TYPE, BlockUpgradedPistonExtension$enumpistontype)
+                		.withProperty(BlockUpgradedPistonHead.FACING, iblockstate.getValue(BlockUpgradedPistonBase.FACING))
+                		.withProperty(BlockUpgradedPistonHead.SHORT, Boolean.valueOf(te.getProgress(partialTicks) >= 0.5F));
                 this.renderStateModel(blockpos, iblockstate1, bufferbuilder, world, true);
                 bufferbuilder.setTranslation(x - (double)blockpos.getX(), y - (double)blockpos.getY(), z - (double)blockpos.getZ());
                 iblockstate = iblockstate.withProperty(BlockUpgradedPistonBase.EXTENDED, Boolean.valueOf(true));

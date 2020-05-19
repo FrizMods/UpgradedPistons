@@ -6,7 +6,8 @@ import java.util.Random;
 import javax.annotation.Nullable;
 
 import com.frizmods.upgradedpistons.Main;
-import com.frizmods.upgradedpistons.common.tileentities.TileEntityUpgradedPiston;
+import com.frizmods.upgradedpistons.common.tileentities.TileEntityUpgradedPistonHead;
+import com.frizmods.upgradedpistons.common.tileentities.TileEntityUpgradedPistonRod;
 import com.frizmods.upgradedpistons.common.util.IHasModel;
 import com.frizmods.upgradedpistons.init.ModBlocks;
 import com.frizmods.upgradedpistons.init.ModItems;
@@ -15,6 +16,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockFaceShape;
@@ -40,19 +42,14 @@ import net.minecraft.world.World;
 
 public class BlockUpgradedPistonMoving extends BlockContainer
 {
-    public static final PropertyDirection FACING = BlockUpgradedPistonExtension.FACING;
-    public static final PropertyEnum<BlockUpgradedPistonExtension.EnumPistonType> TYPE = BlockUpgradedPistonExtension.TYPE;
+    public static final PropertyDirection FACING = BlockUpgradedPistonHead.FACING;
+    public static final PropertyEnum<BlockUpgradedPistonHead.EnumPistonType> TYPE = BlockUpgradedPistonHead.TYPE;
 
-    public BlockUpgradedPistonMoving(String name)
+    public BlockUpgradedPistonMoving()
     {
         super(Material.PISTON);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(TYPE, BlockUpgradedPistonExtension.EnumPistonType.DEFAULT));
+        this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(TYPE, BlockUpgradedPistonHead.EnumPistonType.DEFAULT));
         this.setHardness(-1.0F);
-        
-        setRegistryName(name);//sets the registry name of the new block
-        
-        ModBlocks.BLOCKS.add(this);
-		ModItems.ITEMS.add(new ItemBlock(this).setRegistryName(this.getRegistryName()));
     }
 
     /**
@@ -64,9 +61,14 @@ public class BlockUpgradedPistonMoving extends BlockContainer
         return null;
     }
 
-    public static TileEntity createTilePiston(IBlockState blockStateIn, EnumFacing facingIn, boolean extendingIn, boolean shouldHeadBeRenderedIn)
+    public static TileEntity createTilePistonHead(IBlockState blockStateIn, EnumFacing facingIn, boolean extendingIn, boolean shouldHeadBeRenderedIn)
     {
-        return new TileEntityUpgradedPiston(blockStateIn, facingIn, extendingIn, shouldHeadBeRenderedIn);
+        return new TileEntityUpgradedPistonHead(blockStateIn, facingIn, extendingIn, shouldHeadBeRenderedIn);
+    }
+    
+    public static TileEntity createTilePistonRod(IBlockState blockStateIn, EnumFacing facingIn, boolean extendingIn, boolean shouldHeadBeRenderedIn)
+    {
+        return new TileEntityUpgradedPistonRod(blockStateIn, facingIn, extendingIn, shouldHeadBeRenderedIn);
     }
 
     /**
@@ -76,9 +78,9 @@ public class BlockUpgradedPistonMoving extends BlockContainer
     {
         TileEntity tileentity = worldIn.getTileEntity(pos);
 
-        if (tileentity instanceof TileEntityUpgradedPiston)
+        if (tileentity instanceof TileEntityUpgradedPistonHead)
         {
-            ((TileEntityUpgradedPiston)tileentity).clearPistonTileEntity();
+            ((TileEntityUpgradedPistonHead)tileentity).clearPistonTileEntity();
         }
         else
         {
@@ -126,7 +128,7 @@ public class BlockUpgradedPistonMoving extends BlockContainer
 
     public boolean isFullCube(IBlockState state)
     {
-        return false;
+        return true;
     }
 
     /**
@@ -160,7 +162,7 @@ public class BlockUpgradedPistonMoving extends BlockContainer
     {
         if (false && !worldIn.isRemote) // Forge: Noop this out
         {
-            TileEntityUpgradedPiston tileentitypiston = this.getTilePistonAt(worldIn, pos);
+            TileEntityUpgradedPistonHead tileentitypiston = this.getTilePistonAt(worldIn, pos);
 
             if (tileentitypiston != null)
             {
@@ -196,13 +198,13 @@ public class BlockUpgradedPistonMoving extends BlockContainer
     @Nullable
     public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos)
     {
-        TileEntityUpgradedPiston tileentitypiston = this.getTilePistonAt(worldIn, pos);
+        TileEntityUpgradedPistonHead tileentitypiston = this.getTilePistonAt(worldIn, pos);
         return tileentitypiston == null ? null : tileentitypiston.getAABB(worldIn, pos);
     }
 
     public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean isActualState)
     {
-        TileEntityUpgradedPiston tileentitypiston = this.getTilePistonAt(worldIn, pos);
+        TileEntityUpgradedPistonHead tileentitypiston = this.getTilePistonAt(worldIn, pos);
 
         if (tileentitypiston != null)
         {
@@ -212,7 +214,7 @@ public class BlockUpgradedPistonMoving extends BlockContainer
 
     public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
     {
-        TileEntityUpgradedPiston tileentitypiston = this.getTilePistonAt(source, pos);
+        TileEntityUpgradedPistonHead tileentitypiston = this.getTilePistonAt(source, pos);
         return tileentitypiston != null ? tileentitypiston.getAABB(source, pos) : FULL_BLOCK_AABB;
     }
 
@@ -220,10 +222,10 @@ public class BlockUpgradedPistonMoving extends BlockContainer
      * Gets a TileEntityUpgradedPiston at the given position. Returns null if the tile is not an instance of TileEntityUpgradedPiston.
      */
     @Nullable
-    private TileEntityUpgradedPiston getTilePistonAt(IBlockAccess iBlockAccessIn, BlockPos blockPosIn)
+    private TileEntityUpgradedPistonHead getTilePistonAt(IBlockAccess iBlockAccessIn, BlockPos blockPosIn)
     {
         TileEntity tileentity = iBlockAccessIn.getTileEntity(blockPosIn);
-        return tileentity instanceof TileEntityUpgradedPiston ? (TileEntityUpgradedPiston)tileentity : null;
+        return tileentity instanceof TileEntityUpgradedPistonHead ? (TileEntityUpgradedPistonHead)tileentity : null;
     }
 
     public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
@@ -236,7 +238,7 @@ public class BlockUpgradedPistonMoving extends BlockContainer
      */
     public IBlockState getStateFromMeta(int meta)
     {
-        return this.getDefaultState().withProperty(FACING, BlockUpgradedPistonExtension.getFacing(meta)).withProperty(TYPE, (meta & 8) > 0 ? BlockUpgradedPistonExtension.EnumPistonType.STICKY : BlockUpgradedPistonExtension.EnumPistonType.DEFAULT);
+        return this.getDefaultState().withProperty(FACING, BlockUpgradedPistonHead.getFacing(meta)).withProperty(TYPE, (meta & 8) > 0 ? BlockUpgradedPistonHead.EnumPistonType.STICKY : BlockUpgradedPistonHead.EnumPistonType.DEFAULT);
     }
 
     /**
@@ -265,7 +267,7 @@ public class BlockUpgradedPistonMoving extends BlockContainer
         int i = 0;
         i = i | ((EnumFacing)state.getValue(FACING)).getIndex();
 
-        if (state.getValue(TYPE) == BlockUpgradedPistonExtension.EnumPistonType.STICKY)
+        if (state.getValue(TYPE) == BlockUpgradedPistonHead.EnumPistonType.STICKY)
         {
             i |= 8;
         }
@@ -281,7 +283,7 @@ public class BlockUpgradedPistonMoving extends BlockContainer
     @Override
     public void getDrops(net.minecraft.util.NonNullList<net.minecraft.item.ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune)
     {
-        TileEntityUpgradedPiston tileentitypiston = this.getTilePistonAt(world, pos);
+        TileEntityUpgradedPistonHead tileentitypiston = this.getTilePistonAt(world, pos);
         if (tileentitypiston != null)
         {
             IBlockState pushed = tileentitypiston.getPistonState();
@@ -300,6 +302,6 @@ public class BlockUpgradedPistonMoving extends BlockContainer
      */
     public BlockFaceShape getBlockFaceShape(IBlockAccess worldIn, IBlockState state, BlockPos pos, EnumFacing face)
     {
-        return BlockFaceShape.UNDEFINED;
+        return BlockFaceShape.SOLID;
     }
 }

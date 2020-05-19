@@ -3,10 +3,13 @@ package com.frizmods.upgradedpistons;
 import com.frizmods.upgradedpistons.client.renderer.TileEntityUpgradedPistonRenderer;
 //import com.frizmods.upgradedpistons.init.ModRecipes;
 import com.frizmods.upgradedpistons.common.CommonProxy;
-import com.frizmods.upgradedpistons.common.tileentities.TileEntityUpgradedPiston;
+import com.frizmods.upgradedpistons.common.tileentities.TileEntityUpgradedPistonHead;
 import com.frizmods.upgradedpistons.common.util.Reference;
 //import com.frizmods.upgradedpistons.world.ModWorldGen;
+import com.frizmods.upgradedpistons.init.ModBlocks;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockPistonBase;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.init.Blocks;
 import net.minecraftforge.event.RegistryEvent.Register;
@@ -39,9 +42,9 @@ public class Main {
 	public static void init(FMLInitializationEvent event)
 	{
 		//ModRecipes.init();
-		
-		TileEntitySpecialRenderer<TileEntityUpgradedPiston> upgradedPistonRenderer = new TileEntityUpgradedPistonRenderer();
-		ClientRegistry.registerTileEntity(TileEntityUpgradedPiston.class, "tileentity_upgraded_piston", upgradedPistonRenderer);
+			
+		TileEntitySpecialRenderer<TileEntityUpgradedPistonHead> upgradedPistonRenderer = new TileEntityUpgradedPistonRenderer();
+		ClientRegistry.registerTileEntity(TileEntityUpgradedPistonHead.class, "upgradedpistons:tileentity_upgraded_piston", upgradedPistonRenderer);
 	}
 	
 	@EventHandler

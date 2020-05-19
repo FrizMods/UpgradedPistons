@@ -37,22 +37,19 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class BlockUpgradedPistonExtension extends BlockDirectional
+public class BlockUpgradedPistonRod extends BlockDirectional
 {
-    public static final PropertyEnum<BlockUpgradedPistonExtension.EnumPistonType> TYPE = PropertyEnum.<BlockUpgradedPistonExtension.EnumPistonType>create("type", BlockUpgradedPistonExtension.EnumPistonType.class);
     public static final PropertyBool SHORT = PropertyBool.create("short");
-    protected static final AxisAlignedBB PISTON_EXTENSION_EAST_AABB = new AxisAlignedBB(0.75D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
-    protected static final AxisAlignedBB PISTON_EXTENSION_WEST_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.25D, 1.0D, 1.0D);
-    protected static final AxisAlignedBB PISTON_EXTENSION_SOUTH_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.75D, 1.0D, 1.0D, 1.0D);
-    protected static final AxisAlignedBB PISTON_EXTENSION_NORTH_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 0.25D);
-    protected static final AxisAlignedBB PISTON_EXTENSION_UP_AABB = new AxisAlignedBB(0.0D, 0.75D, 0.0D, 1.0D, 1.0D, 1.0D);
-    protected static final AxisAlignedBB PISTON_EXTENSION_DOWN_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.25D, 1.0D);
+    
+    //used for piston rod
     protected static final AxisAlignedBB UP_ARM_AABB = new AxisAlignedBB(0.375D, -0.25D, 0.375D, 0.625D, 0.75D, 0.625D);
     protected static final AxisAlignedBB DOWN_ARM_AABB = new AxisAlignedBB(0.375D, 0.25D, 0.375D, 0.625D, 1.25D, 0.625D);
     protected static final AxisAlignedBB SOUTH_ARM_AABB = new AxisAlignedBB(0.375D, 0.375D, -0.25D, 0.625D, 0.625D, 0.75D);
     protected static final AxisAlignedBB NORTH_ARM_AABB = new AxisAlignedBB(0.375D, 0.375D, 0.25D, 0.625D, 0.625D, 1.25D);
     protected static final AxisAlignedBB EAST_ARM_AABB = new AxisAlignedBB(-0.25D, 0.375D, 0.375D, 0.75D, 0.625D, 0.625D);
     protected static final AxisAlignedBB WEST_ARM_AABB = new AxisAlignedBB(0.25D, 0.375D, 0.375D, 1.25D, 0.625D, 0.625D);
+    
+    //used for short version of piston rod
     protected static final AxisAlignedBB SHORT_UP_ARM_AABB = new AxisAlignedBB(0.375D, 0.0D, 0.375D, 0.625D, 0.75D, 0.625D);
     protected static final AxisAlignedBB SHORT_DOWN_ARM_AABB = new AxisAlignedBB(0.375D, 0.25D, 0.375D, 0.625D, 1.0D, 0.625D);
     protected static final AxisAlignedBB SHORT_SOUTH_ARM_AABB = new AxisAlignedBB(0.375D, 0.375D, 0.0D, 0.625D, 0.625D, 0.75D);
@@ -60,48 +57,34 @@ public class BlockUpgradedPistonExtension extends BlockDirectional
     protected static final AxisAlignedBB SHORT_EAST_ARM_AABB = new AxisAlignedBB(0.0D, 0.375D, 0.375D, 0.75D, 0.625D, 0.625D);
     protected static final AxisAlignedBB SHORT_WEST_ARM_AABB = new AxisAlignedBB(0.25D, 0.375D, 0.375D, 1.0D, 0.625D, 0.625D);
 
-    public BlockUpgradedPistonExtension(String name)
+    public BlockUpgradedPistonRod(String name)
     {
     	super(Material.PISTON);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(TYPE, BlockUpgradedPistonExtension.EnumPistonType.DEFAULT).withProperty(SHORT, Boolean.valueOf(false)));
-        this.setSoundType(SoundType.STONE);
+    	setRegistryName(name);//sets the registry name of the new block
+    	this.setSoundType(SoundType.STONE);
         this.setHardness(0.5F);
         
-        setRegistryName(name);//sets the registry name of the new block
+        this.setDefaultState(this.blockState.getBaseState()
+        		.withProperty(FACING, EnumFacing.NORTH)
+        		.withProperty(SHORT, Boolean.valueOf(false)));
         
         ModBlocks.BLOCKS.add(this);
-		ModItems.ITEMS.add(new ItemBlock(this).setRegistryName(this.getRegistryName()));
     }
 
-    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
+    @SideOnly(Side.CLIENT)
+    public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
-        switch ((EnumFacing)state.getValue(FACING))
-        {
-            case DOWN:
-            default:
-                return PISTON_EXTENSION_DOWN_AABB;
-            case UP:
-                return PISTON_EXTENSION_UP_AABB;
-            case NORTH:
-                return PISTON_EXTENSION_NORTH_AABB;
-            case SOUTH:
-                return PISTON_EXTENSION_SOUTH_AABB;
-            case WEST:
-                return PISTON_EXTENSION_WEST_AABB;
-            case EAST:
-                return PISTON_EXTENSION_EAST_AABB;
-        }
+        return true;
     }
 
     public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean isActualState)
     {
-        addCollisionBoxToList(pos, entityBox, collidingBoxes, state.getBoundingBox(worldIn, pos));
-        addCollisionBoxToList(pos, entityBox, collidingBoxes, this.getArmShape(state));
+        addCollisionBoxToList(pos, entityBox, collidingBoxes, this.getArmShape(state));//rod collision box
     }
 
     private AxisAlignedBB getArmShape(IBlockState state)
     {
-        boolean flag = ((Boolean)state.getValue(SHORT)).booleanValue();
+        boolean flag = ((Boolean)state.getValue(SHORT)).booleanValue();;
 
         switch ((EnumFacing)state.getValue(FACING))
         {
@@ -140,7 +123,7 @@ public class BlockUpgradedPistonExtension extends BlockDirectional
             BlockPos blockpos = pos.offset(((EnumFacing)state.getValue(FACING)).getOpposite());
             Block block = worldIn.getBlockState(blockpos).getBlock();
 
-            if (block == ModBlocks.UPGRADED_PISTON || block == ModBlocks.UPGRADED_STICKY_PISTON)
+            if (block instanceof BlockUpgradedPistonBase)
             {
                 worldIn.setBlockToAir(blockpos);
             }
@@ -159,7 +142,7 @@ public class BlockUpgradedPistonExtension extends BlockDirectional
         pos = pos.offset(enumfacing);
         IBlockState iblockstate = worldIn.getBlockState(pos);
 
-        if ((iblockstate.getBlock() == ModBlocks.UPGRADED_PISTON || iblockstate.getBlock() == ModBlocks.UPGRADED_STICKY_PISTON) && ((Boolean)iblockstate.getValue(BlockUpgradedPistonBase.EXTENDED)).booleanValue())
+        if ((iblockstate.getBlock() instanceof BlockUpgradedPistonBase) && ((Boolean)iblockstate.getValue(BlockUpgradedPistonBase.EXTENDED)).booleanValue())
         {
             iblockstate.getBlock().dropBlockAsItem(worldIn, pos, iblockstate, 0);
             worldIn.setBlockToAir(pos);
@@ -214,20 +197,14 @@ public class BlockUpgradedPistonExtension extends BlockDirectional
         BlockPos blockpos = pos.offset(enumfacing.getOpposite());
         IBlockState iblockstate = worldIn.getBlockState(blockpos);
 
-        if (iblockstate.getBlock() != ModBlocks.UPGRADED_PISTON && iblockstate.getBlock() != ModBlocks.UPGRADED_STICKY_PISTON)
-        {
-            worldIn.setBlockToAir(pos);
-        }
-        else
+        if (iblockstate.getBlock() instanceof BlockUpgradedPistonBase)
         {
             iblockstate.neighborChanged(worldIn, blockpos, blockIn, fromPos);
         }
-    }
-
-    @SideOnly(Side.CLIENT)
-    public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
-    {
-        return true;
+        else
+        {
+            worldIn.setBlockToAir(pos);
+        }
     }
 
     @Nullable
@@ -239,7 +216,8 @@ public class BlockUpgradedPistonExtension extends BlockDirectional
 
     public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
     {
-        return new ItemStack(state.getValue(TYPE) == BlockUpgradedPistonExtension.EnumPistonType.STICKY ? ModBlocks.UPGRADED_STICKY_PISTON : ModBlocks.UPGRADED_PISTON);
+    	//TODO: make it so even if extended the rod can find the base of the piston and return the base item
+        return null;//new ItemStack(state.getValue(TYPE) == BlockUpgradedPistonRod.EnumPistonType.STICKY ? ModBlocks.UPGRADED_STICKY_PISTON : ModBlocks.UPGRADED_PISTON);
     }
 
     /**
@@ -247,7 +225,10 @@ public class BlockUpgradedPistonExtension extends BlockDirectional
      */
     public IBlockState getStateFromMeta(int meta)
     {
-        return this.getDefaultState().withProperty(FACING, getFacing(meta)).withProperty(TYPE, (meta & 8) > 0 ? BlockUpgradedPistonExtension.EnumPistonType.STICKY : BlockUpgradedPistonExtension.EnumPistonType.DEFAULT);
+    	//TODO: test this
+        return this.getDefaultState()
+        		.withProperty(FACING, getFacing(meta));
+        		//.withProperty(TYPE, (meta & 8) > 0 ? BlockUpgradedPistonRod.EnumPistonType.STICKY : BlockUpgradedPistonRod.EnumPistonType.DEFAULT);
     }
 
     /**
@@ -258,10 +239,10 @@ public class BlockUpgradedPistonExtension extends BlockDirectional
         int i = 0;
         i = i | ((EnumFacing)state.getValue(FACING)).getIndex();
 
-        if (state.getValue(TYPE) == BlockUpgradedPistonExtension.EnumPistonType.STICKY)
-        {
-            i |= 8;
-        }
+        //if (state.getValue(TYPE) == BlockUpgradedPistonRod.EnumPistonType.STICKY)
+        //{
+        //    i |= 8;
+        //}
 
         return i;
     }
@@ -286,7 +267,7 @@ public class BlockUpgradedPistonExtension extends BlockDirectional
 
     protected BlockStateContainer createBlockState()
     {
-        return new BlockStateContainer(this, new IProperty[] {FACING, TYPE, SHORT});
+        return new BlockStateContainer(this, new IProperty[] {FACING, SHORT});
     }
 
     /**
