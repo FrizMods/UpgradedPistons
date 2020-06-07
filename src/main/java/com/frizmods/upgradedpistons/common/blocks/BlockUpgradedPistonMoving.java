@@ -44,11 +44,16 @@ public class BlockUpgradedPistonMoving extends BlockContainer
 {
     public static final PropertyDirection FACING = BlockUpgradedPistonHead.FACING;
     public static final PropertyEnum<BlockUpgradedPistonHead.EnumPistonType> TYPE = BlockUpgradedPistonHead.TYPE;
-
+    
+  //TODO: extension length parameter, 1 is default
+    private final int extensionOffset = 1;
+    
     public BlockUpgradedPistonMoving()
     {
         super(Material.PISTON);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(TYPE, BlockUpgradedPistonHead.EnumPistonType.DEFAULT));
+        this.setDefaultState(this.blockState.getBaseState()
+        		.withProperty(FACING, EnumFacing.NORTH)
+        		.withProperty(TYPE, BlockUpgradedPistonHead.EnumPistonType.DEFAULT));
         this.setHardness(-1.0F);
     }
 
@@ -61,14 +66,14 @@ public class BlockUpgradedPistonMoving extends BlockContainer
         return null;
     }
 
-    public static TileEntity createTilePistonHead(IBlockState blockStateIn, EnumFacing facingIn, boolean extendingIn, boolean shouldHeadBeRenderedIn)
+    public static TileEntity createTilePistonHead(IBlockState blockStateIn, EnumFacing facingIn, boolean extendingIn, boolean isPistonExtensionIn, int extendedLengthIn)
     {
-        return new TileEntityUpgradedPistonHead(blockStateIn, facingIn, extendingIn, shouldHeadBeRenderedIn);
+        return new TileEntityUpgradedPistonHead(blockStateIn, facingIn, extendingIn, isPistonExtensionIn, extendedLengthIn, extendedLengthIn);
     }
     
-    public static TileEntity createTilePistonRod(IBlockState blockStateIn, EnumFacing facingIn, boolean extendingIn, boolean shouldHeadBeRenderedIn)
+    public static TileEntity createTilePistonHeadRod(IBlockState blockStateIn, EnumFacing facingIn, boolean extendingIn, int extendedLengthIn, int extensionOffsetIn)
     {
-        return new TileEntityUpgradedPistonRod(blockStateIn, facingIn, extendingIn, shouldHeadBeRenderedIn);
+    	return new TileEntityUpgradedPistonHead(blockStateIn, facingIn, extendingIn, true, extendedLengthIn, extensionOffsetIn);
     }
 
     /**
@@ -78,7 +83,7 @@ public class BlockUpgradedPistonMoving extends BlockContainer
     {
         TileEntity tileentity = worldIn.getTileEntity(pos);
 
-        if (tileentity instanceof TileEntityUpgradedPistonHead)
+        if (tileentity instanceof TileEntityUpgradedPistonHead || tileentity instanceof TileEntityUpgradedPistonRod)
         {
             ((TileEntityUpgradedPistonHead)tileentity).clearPistonTileEntity();
         }

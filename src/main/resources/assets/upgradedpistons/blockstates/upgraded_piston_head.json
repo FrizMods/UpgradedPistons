@@ -12,6 +12,12 @@
         "facing=south,short=false,type=sticky": { "model": "upgradedpistons:stateinterface/piston_head_sticky", "y": 180 },
         "facing=west,short=false,type=sticky": { "model": "upgradedpistons:stateinterface/piston_head_sticky", "y": 270 },
         "facing=east,short=false,type=sticky": { "model": "upgradedpistons:stateinterface/piston_head_sticky", "y": 90 },
+        "facing=down,short=false,type=rod_only": { "model": "upgradedpistons:stateinterface/piston_rod", "x": 90 },
+        "facing=up,short=false,type=rod_only": { "model": "upgradedpistons:stateinterface/piston_rod", "x": 270 },
+        "facing=north,short=false,type=rod_only": { "model": "upgradedpistons:stateinterface/piston_rod" },
+        "facing=south,short=false,type=rod_only": { "model": "upgradedpistons:stateinterface/piston_rod", "y": 180 },
+        "facing=west,short=false,type=rod_only": { "model": "upgradedpistons:stateinterface/piston_rod", "y": 270 },
+        "facing=east,short=false,type=rod_only": { "model": "upgradedpistons:stateinterface/piston_rod", "y": 90 },
         "facing=down,short=true,type=normal": { "model": "upgradedpistons:stateinterface/piston_head_normal_short", "x": 90 },
         "facing=up,short=true,type=normal": { "model": "upgradedpistons:stateinterface/piston_head_normal_short", "x": 270 },
         "facing=north,short=true,type=normal": { "model": "upgradedpistons:stateinterface/piston_head_normal_short" },
@@ -23,6 +29,12 @@
         "facing=north,short=true,type=sticky": { "model": "upgradedpistons:stateinterface/piston_head_sticky_short" },
         "facing=south,short=true,type=sticky": { "model": "upgradedpistons:stateinterface/piston_head_sticky_short", "y": 180 },
         "facing=west,short=true,type=sticky": { "model": "upgradedpistons:stateinterface/piston_head_sticky_short", "y": 270 },
-        "facing=east,short=true,type=sticky": { "model": "upgradedpistons:stateinterface/piston_head_sticky_short", "y": 90 }
+        "facing=east,short=true,type=sticky": { "model": "upgradedpistons:stateinterface/piston_head_sticky_short", "y": 90 },
+        "facing=down,short=true,type=rod_only": { "model": "upgradedpistons:stateinterface/piston_rod_short", "x": 90 },
+        "facing=up,short=true,type=rod_only": { "model": "upgradedpistons:stateinterface/piston_rod_short", "x": 270 },
+        "facing=north,short=true,type=rod_only": { "model": "upgradedpistons:stateinterface/piston_rod_short" },
+        "facing=south,short=true,type=rod_only": { "model": "upgradedpistons:stateinterface/piston_rod_short", "y": 180 },
+        "facing=west,short=true,type=rod_only": { "model": "upgradedpistons:stateinterface/piston_rod_short", "y": 270 },
+        "facing=east,short=true,type=rod_only": { "model": "upgradedpistons:stateinterface/piston_rod_short", "y": 90 }
     }
 }

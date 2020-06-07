@@ -6,6 +6,8 @@ import java.util.Random;
 import javax.annotation.Nullable;
 
 import com.frizmods.upgradedpistons.Main;
+import com.frizmods.upgradedpistons.common.tileentities.TileEntityUpgradedPistonHead;
+import com.frizmods.upgradedpistons.common.tileentities.TileEntityUpgradedPistonRod;
 import com.frizmods.upgradedpistons.common.util.IHasModel;
 import com.frizmods.upgradedpistons.init.ModBlocks;
 import com.frizmods.upgradedpistons.init.ModItems;
@@ -13,23 +15,28 @@ import com.frizmods.upgradedpistons.init.ModItems;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.SoundType;
+import net.minecraft.block.material.EnumPushReaction;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -43,6 +50,8 @@ public class BlockUpgradedPistonHead extends BlockDirectional
 {
     public static final PropertyEnum<BlockUpgradedPistonHead.EnumPistonType> TYPE = PropertyEnum.<BlockUpgradedPistonHead.EnumPistonType>create("type", BlockUpgradedPistonHead.EnumPistonType.class);
     public static final PropertyBool SHORT = PropertyBool.create("short");
+    public static final PropertyInteger EXT_LENGTH = PropertyInteger.create("ext_length", 0, 1024);
+    public static final PropertyInteger EXT_OFFSET = PropertyInteger.create("ext_offset", 0, 1024);
     
     //used for piston head collision box
     protected static final AxisAlignedBB PISTON_EXTENSION_EAST_AABB = new AxisAlignedBB(0.75D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
@@ -69,6 +78,10 @@ public class BlockUpgradedPistonHead extends BlockDirectional
     protected static final AxisAlignedBB SHORT_WEST_ARM_AABB = new AxisAlignedBB(0.25D, 0.375D, 0.375D, 0.75D, 0.625D, 0.625D);
     
     private AxisAlignedBB lastLookedAtBoundingBox = new AxisAlignedBB(0,0,0,0,0,0);
+    
+    //TODO: extension length parameter, 1 is default
+    private int extensionLength = 1;
+    private int extensionOffset = 1;
 
     public BlockUpgradedPistonHead(String name)
     {
@@ -79,12 +92,15 @@ public class BlockUpgradedPistonHead extends BlockDirectional
         
         this.setDefaultState(this.blockState.getBaseState()
         		.withProperty(FACING, EnumFacing.NORTH)
-        		.withProperty(SHORT, Boolean.valueOf(false))
-        		.withProperty(TYPE, BlockUpgradedPistonHead.EnumPistonType.DEFAULT));
+        		.withProperty(TYPE, BlockUpgradedPistonHead.EnumPistonType.DEFAULT)
+        		.withProperty(SHORT, Boolean.valueOf(false)));
         
         ModBlocks.BLOCKS.add(this);
     }
     
+    /*
+     * This is overiding the default ray check to fix the issue of the piston arm not having a boundingbox
+     */
     public RayTraceResult collisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end)
     {
     	RayTraceResult raytraceresult = this.rayTrace(pos, start, end, blockState.getBoundingBox(worldIn, pos));
@@ -192,7 +208,7 @@ public class BlockUpgradedPistonHead extends BlockDirectional
     {
         super.breakBlock(worldIn, pos, state);
         EnumFacing enumfacing = ((EnumFacing)state.getValue(FACING)).getOpposite();
-        pos = pos.offset(enumfacing);
+        pos = pos.offset(enumfacing, this.extensionOffset);
         IBlockState iblockstate = worldIn.getBlockState(pos);
 
         if ((iblockstate.getBlock() instanceof BlockUpgradedPistonBase) && ((Boolean)iblockstate.getValue(BlockUpgradedPistonBase.EXTENDED)).booleanValue())
@@ -245,12 +261,12 @@ public class BlockUpgradedPistonHead extends BlockDirectional
      * block, etc.
      */
     public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
-    {
+    {    	
         EnumFacing enumfacing = (EnumFacing)state.getValue(FACING);
         BlockPos blockpos = pos.offset(enumfacing.getOpposite());
         IBlockState iblockstate = worldIn.getBlockState(blockpos);
 
-        if (iblockstate.getBlock() instanceof BlockUpgradedPistonBase)
+        if (iblockstate.getBlock() instanceof BlockUpgradedPistonBase || iblockstate.getBlock() instanceof BlockUpgradedPistonHead || iblockstate.getBlock() instanceof BlockUpgradedPistonMoving)
         {
             iblockstate.neighborChanged(worldIn, blockpos, blockIn, fromPos);
         }
@@ -258,6 +274,18 @@ public class BlockUpgradedPistonHead extends BlockDirectional
         {
             worldIn.setBlockToAir(pos);
         }
+    }
+    
+    /**
+     * Called on server when World#addBlockEvent is called. If server returns true, then also called on the client. On
+     * the Server, this may perform additional changes to the world, like pistons replacing the block with an extended
+     * base. On the client, the update may involve replacing tile entities or effects such as sounds or particles
+     */
+    public boolean eventReceived(IBlockState state, World worldIn, BlockPos pos, int id, int param)
+    {
+    	EnumFacing enumfacing = (EnumFacing)state.getValue(FACING);
+    	Main.logger.info("BlockUpgradedPistonHead:eventReceived: "+pos+" orientation="+enumfacing+" param="+param+" remote="+worldIn.isRemote);
+        return true;
     }
 
     @SideOnly(Side.CLIENT)
@@ -343,7 +371,8 @@ public class BlockUpgradedPistonHead extends BlockDirectional
     public static enum EnumPistonType implements IStringSerializable
     {
         DEFAULT("normal"),
-        STICKY("sticky");
+        STICKY("sticky"),
+        ROD_ONLY("rod_only");
 
         private final String VARIANT;
 

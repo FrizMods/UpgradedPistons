@@ -36,7 +36,7 @@ public class BlockUpgradedPistonStructureHelper
         else
         {
             this.moveDirection = pistonFacing.getOpposite();
-            this.blockToMove = posIn.offset(pistonFacing, 2);
+            this.blockToMove = posIn.offset(pistonFacing, extensionOffset + 1);
         }
     }
 

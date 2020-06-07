@@ -21,6 +21,8 @@ import net.minecraft.block.material.EnumPushReaction;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
@@ -48,6 +50,8 @@ import net.minecraft.world.World;
 public class BlockUpgradedPistonBase extends BlockDirectional implements IHasModel
 {        
     public static final PropertyBool EXTENDED = PropertyBool.create("extended");
+    
+    //piston base bounding box
     protected static final AxisAlignedBB PISTON_BASE_EAST_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.75D, 1.0D, 1.0D);
     protected static final AxisAlignedBB PISTON_BASE_WEST_AABB = new AxisAlignedBB(0.25D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
     protected static final AxisAlignedBB PISTON_BASE_SOUTH_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 0.75D);
@@ -59,12 +63,15 @@ public class BlockUpgradedPistonBase extends BlockDirectional implements IHasMod
     //TODO: number of blocks to stick due to magnetic addon, 1 is default
     private final int stickyOffset = 1;
     //TODO: extension length parameter, 1 is default
-    private final int extensionOffset = 1;
+    private final int extensionLength = 3;
+    private final int extendedLength = 2;
 
     public BlockUpgradedPistonBase(String name, boolean isSticky)
     {
         super(Material.PISTON);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(EXTENDED, Boolean.valueOf(false)));
+        this.setDefaultState(this.blockState.getBaseState()
+        		.withProperty(FACING, EnumFacing.NORTH)
+        		.withProperty(EXTENDED, Boolean.valueOf(false)));
         this.isSticky = isSticky;
         this.setSoundType(SoundType.STONE);
         this.setHardness(0.5F);
@@ -160,7 +167,7 @@ public class BlockUpgradedPistonBase extends BlockDirectional implements IHasMod
             this.checkForMove(worldIn, pos, state);
         }
     }
-
+    
     /**
      * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
      * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
@@ -168,12 +175,15 @@ public class BlockUpgradedPistonBase extends BlockDirectional implements IHasMod
      */
     public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
     {
+    	Main.logger.info("PistonBase:neighborChanged: "+pos+" fromPos: "+fromPos);
+    	
+    	
         if (!worldIn.isRemote)
         {
             this.checkForMove(worldIn, pos, state);
         }
     }
-
+    
     /**
      * Called after the block is set in the Chunk data, but before the Tile Entity is set
      */
@@ -191,7 +201,9 @@ public class BlockUpgradedPistonBase extends BlockDirectional implements IHasMod
      */
     public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
     {
-        return this.getDefaultState().withProperty(FACING, EnumFacing.getDirectionFromEntityLiving(pos, placer)).withProperty(EXTENDED, Boolean.valueOf(false));
+        return this.getDefaultState()
+        		.withProperty(FACING, EnumFacing.getDirectionFromEntityLiving(pos, placer))
+        		.withProperty(EXTENDED, Boolean.valueOf(false));
     }
 
     private void checkForMove(World worldIn, BlockPos pos, IBlockState state)
@@ -202,14 +214,21 @@ public class BlockUpgradedPistonBase extends BlockDirectional implements IHasMod
         if (flag && !((Boolean)state.getValue(EXTENDED)).booleanValue())
         {
         	//push out
-            if ((new BlockUpgradedPistonStructureHelper(worldIn, pos, enumfacing, true, this.extensionOffset)).canMove())
+        	Main.logger.info("PistonBase: PUSH OUT");
+            if ((new BlockUpgradedPistonStructureHelper(worldIn, pos, enumfacing, true, this.extensionLength)).canMove())
             {
+            	
                 worldIn.addBlockEvent(pos, this, 0, enumfacing.getIndex());
+            }
+            else
+            {
+            	Main.logger.info("PistonBase: A BLOCK CANT MOVE");
             }
         }
         else if (!flag && ((Boolean)state.getValue(EXTENDED)).booleanValue())
         {
         	//pull in
+        	Main.logger.info("PistonBase: PULL IN");
             worldIn.addBlockEvent(pos, this, 1, enumfacing.getIndex());
         }
     }
@@ -251,7 +270,9 @@ public class BlockUpgradedPistonBase extends BlockDirectional implements IHasMod
      */
     public boolean eventReceived(IBlockState state, World worldIn, BlockPos pos, int id, int param)
     {
-        EnumFacing enumfacing = (EnumFacing)state.getValue(FACING);
+    	EnumFacing enumfacing = (EnumFacing)state.getValue(FACING);
+    	
+    	Main.logger.info("eventReceived: "+pos+" orientation="+enumfacing+" param="+param+" remote="+worldIn.isRemote);
 
         if (!worldIn.isRemote)
         {
@@ -294,12 +315,12 @@ public class BlockUpgradedPistonBase extends BlockDirectional implements IHasMod
             		.withProperty(BlockUpgradedPistonMoving.FACING, enumfacing)
             		.withProperty(BlockUpgradedPistonMoving.TYPE, this.isSticky ? BlockUpgradedPistonHead.EnumPistonType.STICKY : BlockUpgradedPistonHead.EnumPistonType.DEFAULT), 3);
             
-            worldIn.setTileEntity(pos, BlockUpgradedPistonMoving.createTilePistonHead(this.getStateFromMeta(param), enumfacing, false, true));
+            worldIn.setTileEntity(pos, BlockUpgradedPistonMoving.createTilePistonHead(this.getStateFromMeta(param), enumfacing, false, true, this.extensionLength));
             //worldIn.setTileEntity(pos, BlockUpgradedPistonMoving.createTilePistonRod(this.getStateFromMeta(param), enumfacing, false, true));
 
             if (this.isSticky)
             {
-                BlockPos blockpos = pos.add(enumfacing.getFrontOffsetX() * 2, enumfacing.getFrontOffsetY() * 2, enumfacing.getFrontOffsetZ() * 2);
+            	BlockPos blockpos = pos.offset(enumfacing, this.extensionLength + 1);//TODO: change the 1 inacordance with number of blocks to pull back
                 IBlockState iblockstate = worldIn.getBlockState(blockpos);
                 Block block = iblockstate.getBlock();
                 boolean flag1 = false;
@@ -324,10 +345,14 @@ public class BlockUpgradedPistonBase extends BlockDirectional implements IHasMod
                 {
                     this.doMove(worldIn, pos, enumfacing, false);
                 }
+                else if (!flag1 && iblockstate.getBlock().isAir(iblockstate, worldIn, pos.offset(enumfacing, this.extensionLength)))
+                {
+                	worldIn.setBlockToAir(pos.offset(enumfacing, this.extensionLength));
+                }
             }
             else
             {
-                worldIn.setBlockToAir(pos.offset(enumfacing));
+                worldIn.setBlockToAir(pos.offset(enumfacing, this.extensionLength));
             }
 
             worldIn.playSound((EntityPlayer)null, pos, SoundEvents.BLOCK_PISTON_CONTRACT, SoundCategory.BLOCKS, 0.5F, worldIn.rand.nextFloat() * 0.15F + 0.6F);
@@ -404,12 +429,14 @@ public class BlockUpgradedPistonBase extends BlockDirectional implements IHasMod
 
     private boolean doMove(World worldIn, BlockPos pos, EnumFacing direction, boolean extending)
     {
+    	Main.logger.info("doMove: "+pos+" orientation="+direction+" extending="+extending);
+    	
         if (!extending)
         {
-            worldIn.setBlockToAir(pos.offset(direction));
+            worldIn.setBlockToAir(pos.offset(direction, this.extensionLength));
         }
 
-        BlockUpgradedPistonStructureHelper BlockUpgradedPistonStructureHelper = new BlockUpgradedPistonStructureHelper(worldIn, pos, direction, extending, this.extensionOffset);
+        BlockUpgradedPistonStructureHelper BlockUpgradedPistonStructureHelper = new BlockUpgradedPistonStructureHelper(worldIn, pos, direction, extending, this.extensionLength);
 
         if (!BlockUpgradedPistonStructureHelper.canMove())
         {
@@ -448,15 +475,15 @@ public class BlockUpgradedPistonBase extends BlockDirectional implements IHasMod
                 BlockPos currentBlockPos = blocksToMove.get(l);
                 IBlockState currentBlockState = worldIn.getBlockState(currentBlockPos);
                 worldIn.setBlockState(currentBlockPos, Blocks.AIR.getDefaultState(), 2);
-                currentBlockPos = currentBlockPos.offset(enumfacing, this.extensionOffset);
+                currentBlockPos = currentBlockPos.offset(enumfacing, this.extensionLength);
                 worldIn.setBlockState(currentBlockPos, ModBlocks.UPGRADED_PISTON_MOVING.getDefaultState().withProperty(FACING, direction), 4);
-                worldIn.setTileEntity(currentBlockPos, BlockUpgradedPistonMoving.createTilePistonHead(blocksToMoveStates.get(l), direction, extending, false));
+                worldIn.setTileEntity(currentBlockPos, BlockUpgradedPistonMoving.createTilePistonHead(blocksToMoveStates.get(l), direction, extending, false, this.extensionLength));
                 //worldIn.setTileEntity(currentBlockPos, BlockUpgradedPistonMoving.createTilePistonRod(blocksToMoveStates.get(l), direction, extending, false));
                 --numBlocksEffected;
                 allBlocksEffectedStates[numBlocksEffected] = currentBlockState;
             }
 
-            BlockPos pistonHeadPos = pos.offset(direction, this.extensionOffset);//TODO: this can be used for multi length extension
+            BlockPos pistonHeadPos = pos.offset(direction, this.extensionLength);//TODO: this can be used for multi length extension
 
             if (extending)
             {
@@ -464,12 +491,21 @@ public class BlockUpgradedPistonBase extends BlockDirectional implements IHasMod
                 IBlockState pistonHeadBlockState = ModBlocks.UPGRADED_PISTON_HEAD.getDefaultState()
                 		.withProperty(BlockUpgradedPistonHead.FACING, direction)
                 		.withProperty(BlockUpgradedPistonHead.TYPE, isStickyEnum);
+                IBlockState pistonRodBlockState = ModBlocks.UPGRADED_PISTON_HEAD.getDefaultState()
+                		.withProperty(BlockUpgradedPistonRod.FACING, direction)
+                		.withProperty(BlockUpgradedPistonHead.TYPE, BlockUpgradedPistonHead.EnumPistonType.ROD_ONLY);
                 IBlockState pistonMovingBlockState = ModBlocks.UPGRADED_PISTON_MOVING.getDefaultState()
                 		.withProperty(BlockUpgradedPistonMoving.FACING, direction)
                 		.withProperty(BlockUpgradedPistonMoving.TYPE, isStickyEnum);
+                
                 worldIn.setBlockState(pistonHeadPos, pistonMovingBlockState, 4);
-                worldIn.setTileEntity(pistonHeadPos, BlockUpgradedPistonMoving.createTilePistonHead(pistonHeadBlockState, direction, true, true));
-                //worldIn.setTileEntity(pistonHeadPos, BlockUpgradedPistonMoving.createTilePistonRod(pistonHeadBlockState, direction, true, true));
+                worldIn.setTileEntity(pistonHeadPos, BlockUpgradedPistonMoving.createTilePistonHead(pistonHeadBlockState, direction, extending, true, this.extensionLength));
+                
+                for (int i = this.extensionLength - 1; i > 0; i--)
+                {
+                	worldIn.setBlockState(pos.offset(direction, i), pistonMovingBlockState, 4);
+                	worldIn.setTileEntity(pos.offset(direction, i), BlockUpgradedPistonMoving.createTilePistonHeadRod(pistonRodBlockState, direction, extending, this.extensionLength, i));
+                }
             }
 
             for (int i1 = blocksToDestroy.size() - 1; i1 >= 0; --i1)
@@ -484,7 +520,11 @@ public class BlockUpgradedPistonBase extends BlockDirectional implements IHasMod
 
             if (extending)
             {
-                worldIn.notifyNeighborsOfStateChange(pistonHeadPos, ModBlocks.UPGRADED_PISTON_HEAD, false);
+            	worldIn.notifyNeighborsOfStateChange(pistonHeadPos, ModBlocks.UPGRADED_PISTON_HEAD, false);
+            	for (int i = this.extensionLength - 1; i > 0 ; i--)
+                {
+            		worldIn.notifyNeighborsOfStateChange(pos.offset(direction, i), ModBlocks.UPGRADED_PISTON_HEAD, false);
+                }
             }
 
             return true;
